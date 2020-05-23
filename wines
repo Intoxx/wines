@@ -21,6 +21,7 @@ ENV=(
 	WINEDEBUG
 	STAGING_WRITECOPY
 	STAGING_SHARED_MEMORY
+	WINEESYNC
 	DXVK_LOG_LEVEL
 	RADV_PERFTEST
 )
@@ -63,18 +64,18 @@ init() {
 # Print every environment variable which has been set and recognized
 # ${!var} is used get the key (name) of the variable rather than its value
 #
-print_env() {
+set_local_env() {
 	# Print header only if at least one variable has been set
 	IN_USE=0
 	for var in "${ENV[@]}"; do
-		[[ ! -z "${!var}" ]] && IN_USE=1
+		[[ ! -z "${!var}" ]] && IN_USE=1 && break
 	done
 
 	((IN_USE)) && echo "[Environment variables - provided]"
 
 	# Print any variable which has been set
 	for var in "${ENV[@]}"; do
-		[[ ! -z "${!var}" ]] && echo -e "\t$var='${!var}'"
+		[[ ! -z "${!var}" ]] && echo -e "\t$var='${!var}'" && export "$var=${!var}"
 	done
 }
 
@@ -147,8 +148,8 @@ fi
 
 echo "Selected build '$BUILD_NAME'"
 
-# Print passed environment variables for debugging purposes
-print_env
+# Print passed environment variables for debugging purposes and set them for child processes
+set_local_env
 
 # Load chosen wine build environment
 set_wine_env "${BUILDS[$BUILD_NAME]}"
