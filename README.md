@@ -29,7 +29,7 @@ You **must replace** those lines with your build installations while following t
 ```
 BUILDS["<WINE_BUILD_NAME>"]="<WINE_BUILD_PATH>"
 ```
-Note that the `default` **WINE_BUILD_NAME** is a special name telling the script to use that build if no build has been specified.
+Note that the `default` **WINE_BUILD_NAME** is a special name telling the script to use that build if no build has been specified, it can be omitted.
 
 ## Example configuration
 
@@ -54,13 +54,15 @@ wines /path/to/Wow.exe // Won't work because you didn't create a "default" build
 ```
 BUILDS["default"]="/home/intoxx/wine-builds/wine-staging-improved-5.8"
 BUILDS["proton"]="/home/intoxx/wine-builds/wine-proton-5.0.2"
-BUILDS["wine-staging-5.6"]="/home/intoxx/wine-builds/wine-staging-5.6"
+BUILDS["staging"]="/home/intoxx/wine-builds/wine-staging-5.6"
 ```
 
 Usage :
 
 ```
-wines
+wines /path/to/Wow.exe // Will start Wow.exe with the default build and default wine prefix
+wines proton /path/to/Wow.exe // Will start Wow.exe with the proton build and default wine prefix
+WINEPREFIX=/my/prefix DXVK_LOG_LEVEL=none wines staging /path/to/Wow.exe // Will start Wow.exe with the specific prefix and will disable any DXVK log to the output if you're using it
 ```
 
 # Supported environment variables
