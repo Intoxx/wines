@@ -130,6 +130,7 @@ start_wine() {
 	else
 		# Execute provided binary
 		echo "Executing $WINELOADER $1"
+		echo "1 : $1"
 		"$WINELOADER" "$1"
 	fi
 }
@@ -159,8 +160,8 @@ ARGC="${#@}"
 
 if [[ "$ARGC" == 1 ]]; then
 	# First argument is the binary path or name
-	start_wine $1
+	start_wine "$1"
 elif [[ "$ARGC" == 2 ]]; then
 	# Second argument is the binary path or name
-	start_wine $2
+	start_wine "$2"
 fi
