@@ -2,15 +2,21 @@
 A simple script to handle and run different installed versions of wine.
 
 # Installation
-For easier access, directly put the script in the */usr/local/bin* directory.
+For easier access, directly put the script in the **/usr/local/bin** directory.
 
-`git clone https://github.com/Intoxx/wines.git`
-`cd wines`
-`sudo cp wines /usr/local/bin`
+```
+git clone https://github.com/Intoxx/wines.git
+```
+```
+cd wines
+```
+```
+sudo cp wines /usr/local/bin
+```
 
 # Configuration
 Edit the **wines** script, go at the top of it and find the following lines :
-`sudo vim /usr/local/bin/wines`
+```sudo vim /usr/local/bin/wines```
 `BUILDS["default"]="/opt/wine-5.6-staging-improved-amd64"`
 `BUILDS["staging-improved"]="/opt/wine-5.6-staging-improved-amd64"`
 
