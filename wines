@@ -129,7 +129,7 @@ start_wine() {
 	else
 		# Execute provided binary
 		echo "Executing $WINELOADER $1"
-		"$WINELOADER $1"
+		"$WINELOADER" "$1"
 	fi
 }
 
