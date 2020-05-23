@@ -62,7 +62,7 @@ Usage :
 ```
 wines /path/to/Wow.exe // Will start Wow.exe with the default build and default wine prefix
 wines proton /path/to/Wow.exe // Will start Wow.exe with the proton build and default wine prefix
-WINEPREFIX=/my/prefix DXVK_LOG_LEVEL=none wines staging /path/to/Wow.exe // Will start Wow.exe with the specific prefix and will disable any DXVK log to the output if you're using it
+WINEPREFIX=/my/prefix DXVK_LOG_LEVEL=none wines staging /path/to/Wow.exe // Will start Wow.exe with the staging build, the supplied prefix and will disable any DXVK log to the output if you're using it
 ```
 
 # Supported environment variables
