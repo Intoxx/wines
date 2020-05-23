@@ -1,0 +1,165 @@
+#!/bin/bash
+
+#
+# Script to handle different wine installations
+#
+
+# FIX ME : no arguments is being passed to $WINELOADER excepted the binary (add explorer)
+
+########## VARIABLES ##########
+
+# EDIT ME : associative array containing every wine BUILD name with their PATH
+declare -A BUILDS
+BUILDS["default"]="/opt/wine-5.6-staging-improved-amd64"
+BUILDS["staging-improved"]="/opt/wine-5.6-staging-improved-amd64"
+
+# Officially recognized environment variables
+# This is mostly for debugging purposes
+# Any environment variable not listed here will still take effect
+ENV=(
+	WINEPREFIX
+	WINEDEBUG
+	STAGING_WRITECOPY
+	STAGING_SHARED_MEMORY
+	DXVK_LOG_LEVEL
+	RADV_PERFTEST
+)
+
+########## FUNCTIONS ##########
+
+#
+# Print the program usage
+#
+usage() {
+	echo "Usage: wines [build] <binary path | binary name>"
+	echo "Example: wines staging-improved winecfg"
+}
+
+#
+# Parse arguments and return which build has been asked in lowercase
+# If no build has been found, it will return an empty string
+# If no build has been asked, the default build will be return if it exists
+# Parameters :
+#	$@ : array containing program parameters
+#
+init() {
+	ARGC="${#@}"
+	BUILD_FOUND=0
+	BUILD_NAME=""
+
+	if [[ "$ARGC" == 1 ]]; then # One argument provided (eg : wines <binary_path>)
+		# No build supplied, mark the 'default' build for usage if it exists
+		[[ ! -z ${BUILDS["default"]} ]] && BUILD_FOUND=1 && BUILD_NAME="default"
+	elif [[ "$ARGC" == 2 ]]; then # Two arguments provided (eg : wines <build> <binary_path>)
+		# Check if BUILDS contains given parameter $1
+		# Note : ${!BUILDS[@]} gives KEYS, ${BUILDS[@]} gives VALUES, SPACES are important
+		[[ " ${!BUILDS[@]} " =~ " $1 " ]] && BUILD_FOUND=1 && BUILD_NAME="$1"
+	fi
+	
+	((BUILD_FOUND)) && echo "${BUILD_NAME,,}"
+}
+
+#
+# Print every environment variable which has been set and recognized
+# ${!var} is used get the key (name) of the variable rather than its value
+#
+print_env() {
+	# Print header only if at least one variable has been set
+	IN_USE=0
+	for var in "${ENV[@]}"; do
+		[[ ! -z "${!var}" ]] && IN_USE=1
+	done
+
+	((IN_USE)) && echo "[Environment variables - provided]"
+
+	# Print any variable which has been set
+	for var in "${ENV[@]}"; do
+		[[ ! -z "${!var}" ]] && echo -e "\t$var='${!var}'"
+	done
+}
+
+#
+# Set wine build variables to point to the correct libraries and binaries
+# Parameters :
+#	$1 : must be a string pointing to a valid wine build root directory
+#
+set_wine_env() {
+	# exporting makes sure child process get the variables aswell
+	export PATH="$1/bin:$PATH"
+	export LD_LIBRARY_PATH="$1/lib64:$1/lib:$LD_LIBRARY_PATH"
+	export WINESERVER="$1/bin/wineserver"
+	export WINECFG="$1/bin/winecfg"
+	export WINELOADER="$1/bin/wine"
+	export WINELOADER64="$1/bin/wine64"
+	export WINEDLLPATH="$1/lib64:$1/lib"
+	
+
+	echo "[Environment variables - generated]"
+	echo -e "\tPATH='$PATH'"
+	echo -e "\tLD_LIBRARY_PATH='$LD_LIBRARY_PATH'"
+	echo -e "\tWINESERVER='$WINESERVER'"
+	echo -e "\tWINECFG='$WINECFG'"
+	echo -e "\tWINELOADER='$WINELOADER'"
+	echo -e "\tWINELOADER64='$WINELOADER64'"
+	echo -e "\tWINEDLLPATH='$WINEDLLPATH'"
+}
+
+#
+# Start wine instance or specific binary with previously set environment variables by set_wine_env
+# Parameters :
+#	$1 : binary path or binary name for specific use cases (eg : winecfg)
+#
+start_wine() {
+	if [[ -z "$1" ]]; then
+		echo "You must provide a valid binary path or name"
+		usage
+		exit 1
+	fi
+
+	echo "[Start]"
+
+	if [[ "$1" == "winecfg" ]]; then
+		# Execute "winecfg" with current environment
+		echo "Executing $WINECFG"
+		"$WINECFG"
+	elif [[ "$1" == "kill" ]]; then
+		# Execute "wineserver -k" with current environment
+		echo "Executing $WINESERVER -k"
+		"$WINESERVER" "-k"
+	else
+		# Execute provided binary
+		echo "Executing $WINELOADER $1"
+		"$WINELOADER $1"
+	fi
+}
+
+########## MAIN ##########
+
+# Initialization with provided parameters
+BUILD_NAME=`init "$@"`
+
+# No build found, print help and exit
+if [[ -z "$BUILD_NAME" ]]; then
+	echo "No valid build provided"
+	usage
+	exit 1
+fi
+
+echo "Selected build '$BUILD_NAME'"
+
+# Print passed environment variables for debugging purposes
+print_env
+
+# Load chosen wine build environment
+set_wine_env "${BUILDS[$BUILD_NAME]}"
+
+# Start wine with provided binary name or path
+ARGC="${#@}"
+
+if [[ "$ARGC" == 1 ]]; then
+	# First argument is the binary path or name
+	start_wine $1
+elif [[ "$ARGC" == 2 ]]; then
+	# Second argument is the binary path or name
+	start_wine $2
+fi
